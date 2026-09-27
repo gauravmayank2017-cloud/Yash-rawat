@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godot Script Vault</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #e2e8f0;
+            --accent-color: #38bdf8;
+            --border-color: #334155;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .main-container {
+            width: 100%;
+            max-width: 900px;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        h1 {
+            margin: 0;
+            color: var(--accent-color);
+            font-size: 1.5rem;
+        }
+        .admin-btn {
+            background: none;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .admin-btn:hover {
+            background: var(--accent-color);
+            color: var(--bg-color);
+        }
+        .script-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+        }
+        .script-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .script-title {
+            margin: 0;
+            color: var(--accent-color);
+            font-size: 1.2rem;
+        }
+        .script-desc {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        .copy-btn {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 8px 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .copy-btn:hover {
+            background-color: #0ea5e9;
+        }
+        pre {
+            background-color: #090d16;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 0;
+            border: 1px solid var(--border-color);
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            color: #a5f3fc;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        /* Modal & Admin Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--accent-color);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            background: #090d16;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .btn-save {
+            background: #22c55e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-close {
+            background: #64748b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .stats-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #090d16;
+            padding: 15px;
+            border-radius: 8px;
+            flex: 1;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .stat-card h4 { margin: 0 0 5px 0; color: #94a3b8; font-size: 0.85rem; }
+        .stat-card span { font-size: 1.4rem; font-weight: bold; color: var(--accent-color); }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="top-bar">
+            <h1>🚀 Godot Script Hub</h1>
+            <button class="admin-btn" onclick="openAdmin()">🔒 Admin Panel</button>
+        </div>
+
+        <!-- Analytics Stats Bar -->
+        <div class="stats-box">
+            <div class="stat-card">
+                <h4>कुल विजिटर्स (Total Views)</h4>
+                <span id="total-views">0</span>
+            </div>
+            <div class="stat-card">
+                <h4>कोड कॉपी किए गए (Total Copies)</h4>
+                <span id="total-copies">0</span>
+            </div>
+        </div>
+
+        <!-- Scripts Container -->
+        <div id="scripts-list">
+            <!-- यहाँ डायनामिक कोड कार्ड्स लोड होंगे -->
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content" style="max-width: 300px;">
+            <h3>एडमिन पासवर्ड डालें</h3>
+            <div class="form-group">
+                <input type="password" id="admin-password" placeholder="पासवर्ड (xxxx)">
+            </div>
+            <div class="btn-group">
+                <button class="btn-close" onclick="closeModals()">रद्द करें</button>
+                <button class="btn-save" onclick="verifyPassword()">लॉगिन</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard Modal -->
+    <div id="admin-dashboard" class="modal">
+        <div class="modal-content">
+            <h3>🛠️ एडमिन डैशबोर्ड</h3>
+            
+            <h4 style="color:var(--accent-color); margin-bottom:5px;">नया कोड जोड़ें</h4>
+            <div class="form-group">
+                <label>फाइल का नाम (जैसे: player.gd)</label>
+                <input type="text" id="new-title" placeholder="script.gd">
+            </div>
+            <div class="form-group">
+                <label>डिस्क्रिप्शन (यह कोड किस लिए है?)</label>
+                <input type="text" id="new-desc" placeholder="यह कोड प्लेयर मूवमेंट के लिए है...">
+            </div>
+            <div class="form-group">
+                <label>पूरा कोड यहाँ पेस्ट करें</label>
+                <textarea id="new-code" placeholder="extends CharacterBody2D..."></textarea>
+            </div>
+            <div class="btn-group" style="margin-bottom: 20px;">
+                <button class="btn-save" onclick="addNewScript()">कोड सेव करें</button>
+            </div>
+
+            <hr style="border-color: var(--border-color); margin-bottom: 15px;">
+
+            <h4 style="color:var(--accent-color); margin-bottom:10px;">मौजूदा कोड सूची (मैनेज करें)</h4>
+            <div id="admin-script-list" style="max-height: 150px; overflow-y: auto;">
+                <!-- लिस्ट यहाँ दिखेगी -->
+            </div>
+
+            <div class="btn-group" style="margin-top: 20px;">
+                <button class="btn-close" onclick="closeModals()">बंद करें</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default Sample Data if empty
+        let scripts = JSON.parse(localStorage.getItem('godot_scripts')) || [
+            {
+                id: 1,
+                title: "player_movement.gd",
+                desc: "यह बेसिक 2D प्लेयर मूवमेंट और जंप के लिए जीडीस्क्रिप्ट (GDScript) है।",
+                code: "extends CharacterBody2D\n\nconst SPEED = 300.0\nconst JUMP_VELOCITY = -400.0\n\nfunc _physics_process(delta: float) -> void:\n    if not is_on_floor():\n        velocity += get_gravity() * delta\n    if Input.is_action_just_pressed(\"ui_accept\") and is_on_floor():\n        velocity.y = JUMP_VELOCITY\n    move_and_slide()"
+            }
+        ];
+
+        let stats = JSON.parse(localStorage.getItem('godot_stats')) || { views: 0, copies: 0 };
+
+        // Increment Views on load
+        stats.views += 1;
+        localStorage.setItem('godot_stats', JSON.stringify(stats));
+
+        function updateStatsDisplay() {
+            document.getElementById('total-views').innerText = stats.views;
+            document.getElementById('total-copies').innerText = stats.copies;
+        }
+
+        function renderScripts() {
+            const listEl = document.getElementById('scripts-list');
+            listEl.innerHTML = '';
+            
+            if (scripts.length === 0) {
+                listEl.innerHTML = '<p style="text-align:center; color:#94a3b8;">अभी कोई कोड उपलब्ध नहीं है। एडमिन पैनल से जोड़ें।</p>';
+                return;
+            }
+
+            scripts.forEach((s) => {
+                listEl.innerHTML += `
+                    <div class="script-card">
+                        <div class="script-header">
+                            <h2 class="script-title">${s.title}</h2>
+                            <button class="copy-btn" onclick="copyCode(${s.id}, this)">कोड कॉपी करें</button>
+                        </div>
+                        <div class="script-desc">${s.desc}</div>
+                        <pre><code>${escapeHtml(s.code)}</code></pre>
+                    </div>
+                `;
+            });
+            updateStatsDisplay();
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function copyCode(id, btnElement) {
+            const script = scripts.find(s => s.id === id);
+            if(script) {
+                navigator.clipboard.writeText(script.code).then(() => {
+                    btnElement.innerText = "कॉपी हो गया! ✅";
+                    stats.copies += 1;
+                    localStorage.setItem('godot_stats', JSON.stringify(stats));
+                    updateStatsDisplay();
+                    setTimeout(() => {
+                        btnElement.innerText = "कोड कॉपी करें";
+                    }, 2000);
+                });
+            }
+        }
+
+        // Admin Panel Controls
+        function openAdmin() {
+            document.getElementById('password-modal').style.display = 'flex';
+            document.getElementById('admin-password').value = '';
+        }
+
+        function verifyPassword() {
+            const pass = document.getElementById('admin-password').value;
+            if (pass === "1010") {
+                document.getElementById('password-modal').style.display = 'none';
+                document.getElementById('admin-dashboard').style.display = 'flex';
+                renderAdminList();
+            } else {
+                alert("गलत पासवर्ड! कृपया 'xxxx' डालें।");
+            }
+        }
+
+        function closeModals() {
+            document.getElementById('password-modal').style.display = 'none';
+            document.getElementById('admin-dashboard').style.display = 'none';
+        }
+
+        function addNewScript() {
+            const title = document.getElementById('new-title').value.trim();
+            const desc = document.getElementById('new-desc').value.trim();
+            const code = document.getElementById('new-code').value.trim();
+
+            if (!title || !code) {
+                alert("कृपया फाइल का नाम और कोड ज़रूर भरें!");
+                return;
+            }
+
+            const newObj = {
+                id: Date.now(),
+                title: title,
+                desc: desc || "कोई डिस्क्रिप्शन नहीं दिया गया।",
+                code: code
+            };
+
+            scripts.unshift(newObj); // सबसे ऊपर जोड़ें
+            localStorage.setItem('godot_scripts', JSON.stringify(scripts));
+
+            // फील्ड्स साफ़ करें
+            document.getElementById('new-title').value = '';
+            document.getElementById('new-desc').value = '';
+            document.getElementById('new-code').value = '';
+
+            renderScripts();
+            renderAdminList();
+            alert("नया कोड सफलतापूर्वक जुड़ गया है! ✅");
+        }
+
+        function renderAdminList() {
+            const adminListEl = document.getElementById('admin-script-list');
+            adminListEl.innerHTML = '';
+            
+            if (scripts.length === 0) {
+                adminListEl.innerHTML = '<p>कोई फाइल नहीं है।</p>';
+                return;
+            }
+
+            scripts.forEach(s => {
+                adminListEl.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:#090d16; padding:8px 12px; border-radius:6px; margin-bottom:8px;">
+                        <span>${s.title}</span>
+                        <button class="btn-delete" onclick="deleteScript(${s.id})">हटाएं</button>
+                    </div>
+                `;
+            });
+        }
+
+        function deleteScript(id) {
+            if (confirm("क्या आप वाकई इस कोड को हमेशा के लिए हटाना चाहते हैं?")) {
+                scripts = scripts.filter(s => s.id !== id);
+                localStorage.setItem('godot_scripts', JSON.stringify(scripts));
+                renderScripts();
+                renderAdminList();
+            }
+        }
+
+        // Initial Load
+        renderScripts();
+    </script>
+</body>
+</html>
